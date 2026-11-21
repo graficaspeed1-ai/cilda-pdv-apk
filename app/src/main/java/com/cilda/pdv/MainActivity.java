@@ -49,8 +49,6 @@ public class MainActivity extends Activity {
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
-        settings.setAppCacheEnabled(true);
-        settings.setAppCachePath(getCacheDir().getAbsolutePath());
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(false);
