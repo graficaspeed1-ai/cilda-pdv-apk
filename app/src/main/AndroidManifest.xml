@@ -11,5 +11,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ScannerActivity" android:screenOrientation="landscape" android:exported="false" android:windowSoftInputMode="stateAlwaysHidden" />
     </application>
 </manifest>
