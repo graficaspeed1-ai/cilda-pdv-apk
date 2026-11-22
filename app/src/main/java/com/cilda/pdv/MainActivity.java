@@ -238,6 +238,7 @@ public class MainActivity extends Activity {
                 view.evaluateJavascript(PRINT_JS, null);
                 if (HOME_HOST.equals(Uri.parse(url).getHost())) {
                     view.evaluateJavascript(TABLET_MODE_JS, null);
+                    view.evaluateJavascript(MOBILE_MODE_JS, null);
                 }
             }
 
