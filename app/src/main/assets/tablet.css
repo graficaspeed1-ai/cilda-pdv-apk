@@ -1,0 +1,62 @@
+/* CILDA Tablet APK layout: isolated to body.pdv-tablet; website untouched. */
+body.pdv-tablet{
+  --bg:#f7f3f9;--panel:#fff;--ink:#241c2d;--mute:#6e6585;--line:#e2dceb;--accent:#ec008c;--aink:#fff;--gold:#9a6b1f;
+  background:#f7f3f9;color:#241c2d;height:100vh;overflow:hidden;font-family:Arial,sans-serif;
+}
+body.pdv-tablet header{height:76px;min-height:76px;padding:8px 14px;background:#ec008c;color:#fff;border:0;box-shadow:0 2px 6px rgba(100,0,50,.18);overflow:hidden;}
+body.pdv-tablet .logo img{height:54px;max-width:190px;object-fit:contain}
+body.pdv-tablet header .nav{display:flex;align-items:center;flex-wrap:nowrap;overflow:hidden}
+body.pdv-tablet header .nav #t-home,body.pdv-tablet header .nav #t-sell{display:none}
+body.pdv-tablet header .nav .chip{padding:8px 11px;min-height:42px;border-radius:12px;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff;font-size:14px;white-space:nowrap;margin:2px}
+body.pdv-tablet header .stat{color:#fff;font-size:12px;white-space:nowrap;max-width:175px;text-align:right}
+body.pdv-tablet main{display:flex!important;visibility:visible;width:100%;height:calc(100vh - 76px);max-width:none;margin:0;padding:10px;overflow:hidden}
+body.pdv-tablet main>section{flex:1 1 0;min-width:0;display:flex;flex-direction:column;overflow:hidden;margin-right:10px}
+body.pdv-tablet #cart{flex:0 0 36%;width:36%;min-width:290px;position:static;transform:none!important;max-height:none;height:100%;overflow:auto;align-self:stretch;padding:12px;border-radius:14px;border:1px solid #f1a6d2;background:#fff;box-shadow:0 2px 7px rgba(70,0,40,.08)}
+body.pdv-tablet .tools{margin-bottom:8px;white-space:nowrap;overflow:hidden}
+body.pdv-tablet #q{width:auto;min-width:80px;height:52px;padding:12px 16px;border:2px solid #ded5e7;border-radius:13px;font-size:19px;background:#fff;color:#292130}
+body.pdv-tablet #mic{height:52px;min-width:52px;border-radius:12px;background:#0878f9;color:#fff;border:0;font-size:16px}
+body.pdv-tablet #cats{display:block;white-space:nowrap;overflow-x:auto;padding-bottom:4px}
+body.pdv-tablet #cats .chip{display:inline-block;min-height:48px;border-radius:12px;margin:3px;font-size:15px;font-weight:bold;background:#ececf4;border:1px solid #d9d8e5;color:#34313d;white-space:nowrap}
+body.pdv-tablet #cats .chip[aria-pressed=true]{background:#ec008c;color:#fff;border-color:#ec008c}
+body.pdv-tablet #grid{display:block;flex:1;min-height:0;overflow:auto;padding:2px 2px 8px}
+body.pdv-tablet .card{display:inline-flex;vertical-align:top;width:31.5%;min-height:145px;margin:0 1% 9px 0;padding:9px;border-radius:12px;background:#fff;border:1px solid #e4dce9;box-shadow:0 2px 4px rgba(30,10,40,.07)}
+body.pdv-tablet .pimg{height:82px;object-fit:cover;border-radius:9px}
+body.pdv-tablet .nm{font-size:14px;line-height:1.2}
+body.pdv-tablet .sku{font-size:11px}
+body.pdv-tablet .pr{font-size:19px;color:#e60087}
+body.pdv-tablet #cart>.row:first-child{background:#ec008c;margin:-12px -12px 4px;padding:14px 12px;border-radius:13px 13px 0 0}
+body.pdv-tablet #cart h2{font-family:Arial,sans-serif;font-size:19px;color:#fff}
+body.pdv-tablet #cart>.row:first-child .chip{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.35)}
+body.pdv-tablet #items{overflow:auto;max-height:25vh}
+body.pdv-tablet .it{padding:8px 0}
+body.pdv-tablet .qty button{width:38px;height:38px;border-radius:10px;font-size:20px}
+body.pdv-tablet #sum{padding:8px;border-radius:10px;background:#fff3fa}
+body.pdv-tablet .tot{font-size:27px;color:#e60087}
+body.pdv-tablet #pays{display:flex;flex-wrap:wrap;margin:0 -3px}
+body.pdv-tablet #pays .chip{display:inline-block;width:48%;min-height:48px;margin:3px;border-radius:11px;font-size:14px;font-weight:bold}
+body.pdv-tablet #pays .chip[aria-pressed=true]{background:#ec008c;color:#fff;border-color:#ec008c}
+body.pdv-tablet #finish{min-height:58px;border-radius:13px;background:#8b00e8;color:#fff;font-size:18px;font-weight:bold}
+body.pdv-tablet #bar{display:none!important}
+body.pdv-tablet #modal{padding:10px}
+body.pdv-tablet .box{max-height:88vh;overflow:auto}
+body.pdv-tablet #toast{bottom:14px;font-size:16px}
+@media(max-width:740px){body.pdv-tablet #cart{flex-basis:40%;width:40%;min-width:260px}body.pdv-tablet .card{width:48%;margin-right:1%}body.pdv-tablet .pimg{height:72px}}
+@media(orientation:portrait){body.pdv-tablet{min-width:700px}}
+
+/* Fallback colors for Android 4.4 WebView (CSS custom properties unsupported). */
+body.pdv-tablet,body.pdv-tablet main,body.pdv-tablet #grid{background:#f7f3f9;color:#241c2d}
+body.pdv-tablet header,body.pdv-tablet #cart>.row:first-child{background:#ec008c;color:#fff}
+body.pdv-tablet #cart,body.pdv-tablet .card,body.pdv-tablet .box,body.pdv-tablet aside{background:#fff;color:#241c2d;border-color:#e2dceb}
+body.pdv-tablet .chip,body.pdv-tablet #cats .chip,body.pdv-tablet .qty button{background:#ececf4;color:#34313d;border-color:#d9d8e5}
+body.pdv-tablet .mute,body.pdv-tablet .sku,body.pdv-tablet .empty{color:#6e6585}
+body.pdv-tablet .pr,body.pdv-tablet .tot{color:#e60087}
+body.pdv-tablet #finish{background:#8b00e8;color:#fff}
+body.pdv-tablet input,body.pdv-tablet select,body.pdv-tablet textarea{background:#fff;color:#292130;border-color:#ded5e7}
+body.pdv-tablet #sum{background:#fff3fa}
+body.pdv-tablet #cats .chip[aria-pressed=true],body.pdv-tablet #pays .chip[aria-pressed=true]{background:#ec008c;color:#fff;border-color:#ec008c}
+body.pdv-tablet .card{display:inline-block;vertical-align:top}
+body.pdv-tablet .pimg{width:100%;height:82px;display:block}
+body.pdv-tablet #pays .chip{display:inline-block}
+body.pdv-tablet #q{display:inline-block;box-sizing:border-box}
+body.pdv-tablet #cart{box-sizing:border-box}
+body.pdv-tablet main>section{box-sizing:border-box}

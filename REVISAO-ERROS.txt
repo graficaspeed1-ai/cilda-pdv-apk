@@ -1,0 +1,19 @@
+REVISAO / PATCH - CILDA PDV TABLET
+
+Alteracoes nesta versao:
+- O APK passa a abrir os arquivos do PDV incluidos no pacote, em vez de depender de carregar o site remoto. O CSS tablet continua aplicado somente no aplicativo.
+- Incluidos polyfills para runtime moderno (Core-js, regenerator, URL, AbortController e Fetch) na etapa CI.
+- Pipeline GitHub transpila app.js, sync.js, boot.js e config.js para ES5 (Chrome 30 / WebView Android 4.4) antes da compilacao.
+- Incluido polyfill para Element.matches e Element.closest.
+- Adicionados estilos de fallback de cores e layout para CSS custom properties ausentes em Chromium antigo.
+- O service worker permanece desativado para origem file:// pela propria condicao de config.js.
+
+Validacao local:
+- node --check aplicado aos JS fonte (antes da transpilaçao) sem erros.
+- ZIP e estrutura Android conferidos.
+
+Pendencias de validacao real:
+- Nao foi possivel compilar o APK neste ambiente (Android SDK/Gradle nao instalados).
+- A etapa Babel e os polyfills dependem de acesso ao npm no GitHub Actions; nao foram executados aqui.
+- Compatibilidade com Android 4.4.4, login/sync Supabase e impressoras/scanners deve ser testada no tablet fisico.
+- A impressao direta USB/Bluetooth e linguagens TSPL/ZPL nao estao implementadas nesta versao.
