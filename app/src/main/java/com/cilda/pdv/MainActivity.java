@@ -21,6 +21,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebResourceResponse;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -29,6 +30,7 @@ import android.widget.Toast;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * WebView simples para o PDV CILDA.
@@ -113,6 +115,40 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri> uploadMsg;
     private ValueCallback<Uri[]> uploadMsgArray;
     private Uri cameraUri;
+
+    // Serve a KitKat-compatible copy of the web scripts without changing the live PDV site.
+    private WebResourceResponse getBundledResource(String requestUrl) {
+        try {
+            Uri uri = Uri.parse(requestUrl);
+            if (!HOME_HOST.equals(uri.getHost())) return null;
+            String path = uri.getPath();
+            String asset = null;
+            String mime = "text/javascript";
+            if (path == null || path.length() == 0 || "/".equals(path) || "/index.html".equals(path)) {
+                asset = "cilda/index.html";
+                mime = "text/html";
+            } else if ("/app.js".equals(path)) asset = "cilda/app.js";
+            else if ("/sync.js".equals(path)) asset = "cilda/sync.js";
+            else if ("/config.js".equals(path)) asset = "cilda/config.js";
+            else if ("/boot.js".equals(path)) asset = "cilda/boot.js";
+            else if ("/compat.js".equals(path)) asset = "cilda/compat.js";
+            if (asset == null) return null;
+            return new WebResourceResponse(mime, "UTF-8", getAssets().open(asset));
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private boolean isHomeDocumentUrl(String url) {
+        try {
+            Uri uri = Uri.parse(url);
+            String path = uri.getPath();
+            return HOME_HOST.equals(uri.getHost()) &&
+                    (path == null || path.length() == 0 || "/".equals(path) || "/index.html".equals(path));
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -219,6 +255,13 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                WebResourceResponse bundled = getBundledResource(url);
+                if (bundled != null) return bundled;
+                return super.shouldInterceptRequest(view, url);
+            }
+
+            @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.startsWith("http://") || url.startsWith("https://")) {
                     view.loadUrl(url);
@@ -265,6 +308,8 @@ public class MainActivity extends Activity {
 
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                // On Android 4.4 this callback also fires for subresources (fonts/images); do not replace the whole PDV for those.
+                if (!isHomeDocumentUrl(failingUrl)) return;
                 String html = "<html><body style='font-family:sans-serif;text-align:center;padding:60px'>"
                         + "<h2>Sem conexão com o PDV</h2>"
                         + "<p>" + description + "</p>"

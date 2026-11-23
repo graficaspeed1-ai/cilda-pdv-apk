@@ -18,6 +18,17 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install TypeScript transpiler
+        run: npm install --global typescript@5.8.3
+
+      - name: Fetch and transpile PDV scripts for Android 4.4.4
+        run: TSC_BIN="$(command -v tsc)" bash tools/prepare-android44-assets.sh
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
@@ -30,5 +41,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: CILDA-PDV-APK
-
           path: app/build/outputs/apk/debug/app-debug.apk

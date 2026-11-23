@@ -1,0 +1,44 @@
+/* ES5 compatibility helpers for older Android WebView (4.4.4). */
+(function () {
+  if (!Array.prototype.find) Array.prototype.find = function (fn, ctx) { for (var i = 0; i < this.length; i++) if (fn.call(ctx, this[i], i, this)) return this[i]; };
+  if (!Array.prototype.includes) Array.prototype.includes = function (v) { return this.indexOf(v) !== -1; };
+  if (!String.prototype.includes) String.prototype.includes = function (v) { return this.indexOf(v) !== -1; };
+  if (!String.prototype.padStart) String.prototype.padStart = function (targetLength, padString) { var s = String(this), pad = padString === undefined ? ' ' : String(padString); if (s.length >= targetLength) return s; if (!pad) pad = ' '; var need = targetLength - s.length; while (pad.length < need) pad += pad; return pad.slice(0, need) + s; };
+  if (!Object.entries) Object.entries = function (o) { var a = []; for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) a.push([k, o[k]]); return a; };
+  if (!Object.assign) Object.assign = function (t) { for (var i = 1; i < arguments.length; i++) { var s = arguments[i] || {}; for (var k in s) if (Object.prototype.hasOwnProperty.call(s, k)) t[k] = s[k]; } return t; };
+  function syncSetIndices(s) { var old = s._lastLength || 0; for (var i = 0; i < s._a.length; i++) s[i] = s._a[i]; for (var j = s._a.length; j < old; j++) delete s[j]; s.length = s._a.length; s._lastLength = s.length; }
+  function LegacySet(items) { this._a = []; this.length = 0; if (items) { if (typeof items.length === 'number') { for (var i = 0; i < items.length; i++) this.add(items[i]); } else if (typeof items.forEach === 'function') items.forEach(function (v) { this.add(v); }, this); } }
+  LegacySet.prototype.add = function (v) { if (this._a.indexOf(v) < 0) this._a.push(v); syncSetIndices(this); return this; };
+  LegacySet.prototype.has = function (v) { return this._a.indexOf(v) >= 0; };
+  LegacySet.prototype['delete'] = function (v) { var i = this._a.indexOf(v); if (i < 0) return false; this._a.splice(i, 1); syncSetIndices(this); return true; };
+  LegacySet.prototype.clear = function () { this._a = []; syncSetIndices(this); };
+  LegacySet.prototype.forEach = function (fn, ctx) { var set = this; this._a.slice().forEach(function (v) { fn.call(ctx, v, v, set); }); };
+  Object.defineProperty(LegacySet.prototype, 'size', { get: function () { return this._a.length; } });
+  if (typeof Symbol === 'function' && Symbol.iterator) LegacySet.prototype[Symbol.iterator] = function () { var i = 0, a = this._a; return { next: function () { return i < a.length ? { value: a[i++], done: false } : { done: true }; } }; };
+  if (!window.Set || typeof Symbol !== 'function' || !Symbol.iterator || !Set.prototype[Symbol.iterator]) window.Set = LegacySet;
+  function LegacyMap(items) { this._k = []; this._v = []; if (items) for (var i = 0; i < items.length; i++) this.set(items[i][0], items[i][1]); }
+  LegacyMap.prototype.set = function (k, v) { var i = this._k.indexOf(k); if (i < 0) { this._k.push(k); this._v.push(v); } else this._v[i] = v; return this; };
+  LegacyMap.prototype.get = function (k) { var i = this._k.indexOf(k); return i < 0 ? undefined : this._v[i]; };
+  LegacyMap.prototype.has = function (k) { return this._k.indexOf(k) >= 0; };
+  LegacyMap.prototype['delete'] = function (k) { var i = this._k.indexOf(k); if (i < 0) return false; this._k.splice(i, 1); this._v.splice(i, 1); return true; };
+  LegacyMap.prototype.clear = function () { this._k = []; this._v = []; };
+  LegacyMap.prototype.forEach = function (fn, ctx) { for (var i = 0; i < this._k.length; i++) fn.call(ctx, this._v[i], this._k[i], this); };
+  Object.defineProperty(LegacyMap.prototype, 'size', { get: function () { return this._k.length; } });
+  if (typeof Symbol === 'function' && Symbol.iterator) LegacyMap.prototype[Symbol.iterator] = function () { var i = 0, m = this; return { next: function () { return i < m._k.length ? { value: [m._k[i], m._v[i++]], done: false } : { done: true }; } }; };
+  if (!window.Map || typeof Symbol !== 'function' || !Symbol.iterator || !Map.prototype[Symbol.iterator]) window.Map = LegacyMap;
+  if (!window.URL) window.URL = function (input, base) { var text = String(input); if (!/^https?:\/\//i.test(text)) { if (!base) throw new TypeError('Invalid URL'); var origin = String(base).match(/^(https?:\/\/[^/]+)/i); if (!origin) throw new TypeError('Invalid base URL'); text = text.charAt(0) === '/' ? origin[1] + text : String(base).replace(/[^/]*$/, '') + text; } var m = text.match(/^(https?):\/\/([^/?#]+)([^?#]*)(\?[^#]*)?(#.*)?$/i); if (!m) throw new TypeError('Invalid URL'); this.protocol = m[1].toLowerCase() + ':'; this.host = m[2]; this.hostname = this.host.split(':')[0]; this.port = this.host.indexOf(':') >= 0 ? this.host.split(':').slice(1).join(':') : ''; this.pathname = m[3] || '/'; this.search = m[4] || ''; this.hash = m[5] || ''; this.href = this.protocol + '//' + this.host + this.pathname + this.search + this.hash; };
+  if (!window.Promise) {
+    function P(executor) { if (!(this instanceof P)) throw new TypeError('Promise must be called with new'); this.s = 0; this.v = undefined; this.q = []; var self = this, done = false; function resolve(v) { if (done) return; done = true; settle(self, 1, v); } function reject(e) { if (done) return; done = true; settle(self, 2, e); } try { executor(resolve, reject); } catch (e) { reject(e); } }
+    function settle(p, s, v) { if (p.s) return; if (s === 1 && v && typeof v.then === 'function') { try { v.then(function (x) { settle(p, 1, x); }, function (e) { settle(p, 2, e); }); return; } catch (e) { s = 2; v = e; } } p.s = s; p.v = v; setTimeout(function () { var q = p.q.splice(0); for (var i = 0; i < q.length; i++) run(p, q[i]); }, 0); }
+    function run(p, h) { var cb = p.s === 1 ? h.ok : h.fail; if (!cb) { (p.s === 1 ? h.resolve : h.reject)(p.v); return; } try { h.resolve(cb(p.v)); } catch (e) { h.reject(e); } }
+    P.prototype.then = function (ok, fail) { var p = this; return new P(function (resolve, reject) { var h = { ok: typeof ok === 'function' ? ok : null, fail: typeof fail === 'function' ? fail : null, resolve: resolve, reject: reject }; if (p.s) setTimeout(function () { run(p, h); }, 0); else p.q.push(h); }); };
+    P.prototype['catch'] = function (f) { return this.then(null, f); };
+    P.resolve = function (v) { return new P(function (r) { r(v); }); };
+    P.reject = function (e) { return new P(function (r, j) { j(e); }); };
+    P.all = function (a) { return new P(function (resolve, reject) { var out = [], n = a.length; if (!n) return resolve(out); a.forEach(function (v, i) { P.resolve(v).then(function (x) { out[i] = x; if (--n === 0) resolve(out); }, reject); }); }); };
+    window.Promise = P;
+  }
+  if (!window.AbortController) window.AbortController = function () { var self = this; this.signal = { aborted: false, addEventListener: function (t, f) { if (t === 'abort') self._fn = f; }, removeEventListener: function (t, f) { if (self._fn === f) self._fn = null; } }; this.abort = function () { this.signal.aborted = true; if (self._fn) self._fn(); }; };
+  if (!window.fetch) window.fetch = function (url, opts) { opts = opts || {}; return new Promise(function (resolve, reject) { var x = new XMLHttpRequest(); x.open(opts.method || 'GET', url, true); var h = opts.headers || {}; for (var k in h) if (h.hasOwnProperty(k)) x.setRequestHeader(k, h[k]); x.onreadystatechange = function () { if (x.readyState !== 4) return; var status = x.status || 0; var response = { status: status, ok: status >= 200 && status < 300, headers: { get: function (n) { return x.getResponseHeader(n); } }, text: function () { return Promise.resolve(x.responseText || ''); }, json: function () { return Promise.resolve().then(function () { return JSON.parse(x.responseText || 'null'); }); } }; resolve(response); }; x.onerror = function () { reject(new TypeError('Network request failed')); }; x.ontimeout = function () { reject(new TypeError('Network timeout')); }; if (opts.signal) { if (opts.signal.aborted) { x.abort(); reject(new Error('Aborted')); return; } opts.signal.addEventListener('abort', function () { x.abort(); reject(new Error('Aborted')); }); } try { x.send(opts.body === undefined ? null : opts.body); } catch (e) { reject(e); } }); };
+  if (typeof Element !== 'undefined') { var ep = Element.prototype; if (!ep.matches) ep.matches = ep.msMatchesSelector || ep.webkitMatchesSelector || ep.mozMatchesSelector || function (selector) { var root = this.ownerDocument || document, nodes = root.querySelectorAll(selector); for (var i = 0; i < nodes.length; i++) if (nodes[i] === this) return true; return false; }; if (!ep.closest) ep.closest = function (selector) { var el = this; while (el && el.nodeType === 1) { if (el.matches(selector)) return el; el = el.parentElement || el.parentNode; } return null; }; }
+})();
