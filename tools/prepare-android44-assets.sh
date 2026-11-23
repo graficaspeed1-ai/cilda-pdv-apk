@@ -19,7 +19,7 @@ from pathlib import Path
 p = Path(sys.argv[1])
 html = p.read_text(encoding='utf-8')
 # Netlify injects a public HUD script into its response; it is not part of the PDV and is removed from this APK-only copy.
-html = re.sub(r'<script\\b[^>]*src=[\"\\']/.netlify/scripts/hud[^\"\\']*[\"\\'][^>]*>\\s*</script>', '', html, flags=re.I)
+html = re.sub(r'<script\b[^>]*src=["\']/.netlify/scripts/hud[^"\']*["\'][^>]*>\s*</script>', '', html, flags=re.I)
 srcs = re.findall(r'<script\b[^>]*\bsrc=["\']([^"\']+)["\'][^>]*>\s*</script>', html, re.I)
 expected = ['app.js', 'config.js', 'sync.js', 'boot.js']
 if srcs != expected:
