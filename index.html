@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cilda Biju PDV</title>
+<style>
+:root{--ink:#2A1B3D;--mut:#6F6579;--ln:#E4DDE9;--bg:#F7F4F8;--pk:#A12D5F}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font:15px system-ui,sans-serif;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;min-height:44px;border-radius:22px;border:1px solid var(--ln);background:#fff;padding:0 18px;font-weight:600}
+button:disabled{opacity:.5;cursor:default}
+button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+input{height:44px;border:1px solid var(--ln);border-radius:12px;padding:0 14px;background:#fff;-webkit-user-select:text;user-select:text}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 24px}
+.logo{width:52px;height:52px;border-radius:12px;background:#1E1428;color:#D9A98F;display:grid;place-items:center;font:15px Georgia,serif;letter-spacing:1px}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+#st,.mut,small{color:var(--mut)}
+#st{font-size:13px;text-align:right}#st b{color:var(--ink)}
+main{flex:1;display:flex;gap:24px;padding:8px 24px 24px;min-height:0}
+section.l{flex:1;display:flex;flex-direction:column;gap:14px;min-width:0}
+#q{height:52px;border-radius:26px;padding:0 20px}
+#ch{display:flex;gap:10px;flex-wrap:wrap}
+#gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;align-content:start;overflow:auto;flex:1}
+.pc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:112px;border-radius:14px;padding:14px;text-align:left}
+.pc small{font-weight:400;font-size:11px;min-height:14px}.pc .pk{color:var(--pk);font-size:12px}
+.pr{font:24px Georgia,serif;margin-top:auto}
+aside{width:340px;background:#fff;border:1px solid var(--ln);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;overflow:auto}
+h2{margin:0;font:22px Georgia,serif}
+.r{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#ci{flex:1;min-height:80px;overflow:auto}.ct{text-align:center;line-height:1.5}
+.li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #EFE7DF}.f1{flex:1}.f1 small{display:block}
+.sq{width:44px;padding:0;border-radius:12px;font-size:20px}
+#dc{width:84px;text-align:right}
+.tot{font:34px Georgia,serif;color:#8A5A1A}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g2 button{border-radius:12px;height:52px}
+.fin{height:60px;border:0;border-radius:14px;background:var(--pk);color:#fff}.fin:disabled{background:#E9B3CB;opacity:1}
+#g{gap:24px;overflow:auto}.card{flex:1;background:#fff;border:1px solid var(--ln);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ov{position:fixed;inset:0;background:rgba(42,27,61,.55);display:grid;place-items:center}
+.dl{width:360px;background:#fff;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.op{display:flex;justify-content:space-between;align-items:center;height:56px;border:0;border-radius:12px;background:#F1EDF4}
+#t{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:14px 22px;border-radius:14px}
+</style>
+</head>
+<body>
+<header><div class="logo" role="img" aria-label="Cilda Biju">CILDA</div>
+<nav><button data-a="tab" data-c="v" class="on">Vender</button><button data-a="tab" data-c="g">Caixa</button></nav>
+<div id="st"></div></header>
+<main id="v">
+<section class="l"><input id="q" placeholder="Leia o código de barras ou busque por nome ou código" aria-label="Buscar produto"><div id="ch"></div><div id="gr"></div></section>
+<aside>
+<div class="r"><h2>Venda atual</h2><button data-a="clear">Limpar</button></div>
+<div id="ci"></div>
+<label class="r" style="justify-content:flex-start"><input type="checkbox" id="at" style="width:22px;height:22px">Preço de atacado</label>
+<label class="r">Desconto (%)<input id="dc" type="number" min="0" max="100" value="0" inputmode="decimal"></label>
+<div class="r mut"><span>Subtotal</span><span id="sb"></span></div>
+<div class="r"><span>Total</span><span class="tot" id="tt"></span></div>
+<div class="mut">Forma de pagamento</div><div class="g2" id="pg"></div>
+<button class="fin" id="fn" data-a="fin"></button>
+</aside>
+</main>
+<main id="g" hidden></main>
+<div id="m"></div><div id="t" hidden></div>
+<script>
+const K='cb_',$=s=>document.querySelector(s),R=n=>n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(K+k))||d}catch(e){return d}},sv=(k,v)=>{try{localStorage.setItem(K+k,JSON.stringify(v))}catch(e){}};
+const D=[
+{c:'PIR001',n:'Piranha de cabelo',k:'Cabelo',p:4,b:[3,10]},
+{c:'LAC001',n:'Laço de cetim',k:'Cabelo',p:8.9,v:[{n:'Rosa',s:3},{n:'Preto',s:15},{n:'Branco',s:7},{n:'Vermelho',s:11}]},
+{c:'SCR001',n:'Xuxinha de veludo',k:'Cabelo',p:7.5,b:[2,13]},
+{c:'PRG001',n:'Pregadeira de pérola',k:'Pregadeiras',p:14.9},
+{c:'PRG002',n:'Pregadeira de flor',k:'Pregadeiras',p:12.9},
+{c:'BRI001',n:'Brinco argola',k:'Brincos',p:19.9},
+{c:'PUL001',n:'Pulseira elástica',k:'Pulseiras',p:6,b:[3,15]},
+{c:'ANE001',n:'Anel ajustável',k:'Anéis',p:12.9}];
+let P=ld('p',D),S=ld('s',[]),C=ld('c',null),H=ld('h',[]),cart=[],cat='Todos',q='',pay='Pix',view='v',tm;
+const pf=c=>P.find(p=>p.c==c),AT=()=>$('#at').checked;
+const inCart=(c,v)=>(cart.find(i=>i.c==c&&i.v==v)||{q:0}).q;
+const lt=i=>{const p=pf(i.c);return AT()&&p.b?Math.floor(i.q/p.b[0])*p.b[1]+(i.q%p.b[0])*p.p:i.q*p.p};
+const calc=()=>{const sb=Math.round(cart.reduce((a,i)=>a+lt(i),0)*100)/100,d=Math.min(100,Math.max(0,+$('#dc').value||0));return{sb,d,tt:Math.round((sb-sb*d/100)*100)/100}};
+const today=s=>new Date(s.t).toDateString()==new Date().toDateString();
+function toast(t){const e=$('#t');e.textContent=t;e.hidden=false;clearTimeout(tm);tm=setTimeout(()=>e.hidden=true,2200)}
+function rH(){const td=S.filter(today);$('#st').innerHTML='Caixa: <b style="color:'+(C?'#1E7A4C':'var(--pk)')+'">'+(C?'aberto':'fechado')+'</b> · Hoje: <b>'+td.length+'</b> vendas · <b>'+R(td.reduce((a,s)=>a+s.tt,0))+'</b>'}
+function rK(){const cs=['Todos',...new Set(['Cabelo','Pregadeiras','Brincos','Colares','Pulseiras','Anéis',...P.map(p=>p.k)])];$('#ch').innerHTML=cs.map(c=>`<button data-a="cat" data-c="${esc(c)}" class="${c==cat?'on':''}">${esc(c)}</button>`).join('')}
+function rP(){$('#pg').innerHTML=['Pix','Débito','Crédito','Dinheiro'].map(m=>`<button data-a="pay" data-c="${m}" class="${m==pay?'on':''}">${m}</button>`).join('')}
+const flt=()=>P.filter(p=>(cat=='Todos'||p.k==cat)&&(!q||(p.n+' '+p.c).toLowerCase().includes(q)));
+function rG(){$('#gr').innerHTML=flt().map(p=>`<button class="pc" data-a="pick" data-c="${esc(p.c)}"><b>${esc(p.n)}</b><small>${esc(p.c)}</small><small class="pk">${p.b?p.b[0]+' por '+R(p.b[1]):''}</small><span class="pr">${R(p.p)}</span></button>`).join('')}
+function rC(){const cs=calc();$('#ci').innerHTML=cart.length?cart.map(i=>{const p=pf(i.c),a=`data-c="${esc(i.c)}" data-v="${esc(i.v)}"`;return `<div class="li"><div class="f1"><b>${esc(p.n)}${i.v?' · '+esc(i.v):''}</b><small>${R(lt(i))}</small></div><button class="sq" data-a="mn" ${a} aria-label="Diminuir">−</button><b>${i.q}</b><button class="sq" data-a="pl" ${a} aria-label="Aumentar">+</button></div>`}).join(''):'<p class="mut ct">Toque num produto ou digite o código e tecle Enter para começar a venda.</p>';
+$('#sb').textContent=R(cs.sb);$('#tt').textContent=R(cs.tt);const f=$('#fn');f.disabled=!cart.length||!C;f.textContent=!C?'Caixa fechado – abra na aba Caixa':cart.length?'Finalizar venda':'Adicione produtos para finalizar'}
+function add(c,v){const p=pf(c);if(!C)return toast('Abra o caixa para vender');const i=cart.find(i=>i.c==c&&i.v==v);i?i.q++:cart.push({c,v,q:1});rC();rG()}
+function pick(c){if(!C)return toast('Abra o caixa para vender');const p=pf(c);if(!p.v)return add(c,'');$('#m').innerHTML=`<div class="ov" data-a="x"><div class="dl" role="dialog" aria-label="Escolha a variação"><div class="r"><b>${esc(p.n)}</b><span class="mut">${R(p.p)}</span></div><div class="mut">Escolha a variação</div>${p.v.map(x=>{const l=Math.max(0,x.s-inCart(p.c,x.n));return `<button class="op" data-a="opt" data-c="${esc(p.c)}" data-v="${esc(x.n)}"><b>${esc(x.n)}</b><span class="mut">${l} em estoque</span></button>`}).join('')}<button data-a="x">Cancelar</button></div></div>`}
+function fin(){if(!cart.length||!C)return;const{sb,d,tt}=calc(),n=S.length+1;
+S.push({n,cx:C.id,t:Date.now(),pay,at:AT(),d,sb,tt,it:cart.map(i=>({c:i.c,n:pf(i.c).n,v:i.v,q:i.q,tot:lt(i)}))});
+cart.forEach(i=>{const p=pf(i.c);if(p.v){const x=p.v.find(x=>x.n==i.v);x.s=Math.max(0,x.s-i.q)}});
+sv('s',S);sv('p',P);cart=[];$('#dc').value=0;$('#at').checked=false;rAll();toast('Venda #'+String(n).padStart(4,'0')+' registrada')}
+const pm=s=>{s=String(s).trim();if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');return +s||0};
+const fh=t=>new Date(t).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+function sum(cx){const vs=S.filter(s=>s.cx==cx.id),pays={Pix:0,'Débito':0,'Crédito':0,Dinheiro:0};vs.forEach(s=>pays[s.pay]+=s.tt);const op=cx.op||[],sup=op.filter(o=>o.k=='s').reduce((a,o)=>a+o.v,0),san=op.filter(o=>o.k=='r').reduce((a,o)=>a+o.v,0);return{n:vs.length,total:vs.reduce((a,s)=>a+s.tt,0),pays,sup,san,esp:Math.round((cx.fundo+pays.Dinheiro+sup-san)*100)/100}}
+function rM(){let l;
+if(!C)l=`<h2>Caixa fechado</h2><p class="mut">Informe o troco inicial (dinheiro na gaveta) para abrir o caixa e liberar as vendas.</p><input id="c_f" inputmode="decimal" placeholder="Troco inicial (R$)"><button class="on" data-a="abrir">Abrir caixa</button>`;
+else{const m=sum(C),row=(a,b,x='')=>`<div class="r" style="${x}"><span>${a}</span><span>${b}</span></div>`;
+l=`<h2>Caixa aberto</h2><p class="mut">Desde ${fh(C.t)}</p>${row('Troco inicial',R(C.fundo))}${row('Vendas ('+m.n+')',R(m.total))}${Object.keys(m.pays).map(k=>row('· '+k,R(m.pays[k]),'color:var(--mut)')).join('')}${row('Suprimentos',R(m.sup))}${row('Sangrias','− '+R(m.san))}${row('<b>Dinheiro esperado na gaveta</b>','<b>'+R(m.esp)+'</b>')}<div class="r"><input id="c_v" inputmode="decimal" placeholder="Valor (R$)" style="flex:1;min-width:0"><button data-a="sup">Suprimento</button><button data-a="san">Sangria</button></div><h2 style="margin-top:12px">Fechar caixa</h2><input id="c_c" inputmode="decimal" placeholder="Dinheiro contado na gaveta (R$)"><button class="fin" data-a="fechar">Fechar caixa</button>`}
+$('#g').innerHTML=`<section class="card">${l}</section><section class="card"><h2>Últimos fechamentos</h2>${H.length?H.slice(-10).reverse().map(h=>`<div class="r"><span>${fh(h.a)} → ${fh(h.f)}<small style="display:block">${h.n} vendas · ${R(h.total)}</small></span><span style="text-align:right">${R(h.cont)}<small style="display:block">${h.dif==0?'Sem diferença':(h.dif>0?'Sobra ':'Falta ')+R(Math.abs(h.dif))}</small></span></div>`).join(''):'<p class="mut">Nenhum fechamento ainda.</p>'}</section>`}
+function rAll(){rH();rK();rP();rG();rC();if(view=='g')rM()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,c=b.dataset.c,v=b.dataset.v||'';
+if(a=='x'){if(e.target==b)$('#m').innerHTML='';return}
+if(a=='tab'){view=c;$('#v').hidden=c!='v';$('#g').hidden=c!='g';document.querySelectorAll('[data-a=tab]').forEach(t=>t.classList.toggle('on',t.dataset.c==c));rAll()}
+else if(a=='cat'){cat=c;rK();rG()}
+else if(a=='pick')pick(c);
+else if(a=='opt'){$('#m').innerHTML='';add(c,v)}
+else if(a=='pl')add(c,v);
+else if(a=='mn'){const i=cart.find(i=>i.c==c&&i.v==v);if(i&&--i.q<1)cart=cart.filter(x=>x!=i);rC();rG()}
+else if(a=='pay'){pay=c;rP()}
+else if(a=='clear'){cart=[];rC();rG()}
+else if(a=='fin')fin();
+else if(a=='abrir'){C={id:Date.now(),t:Date.now(),fundo:pm($('#c_f').value),op:[]};sv('c',C);rAll();toast('Caixa aberto')}
+else if(a=='sup'||a=='san'){const x=pm($('#c_v').value);if(!(x>0))return toast('Informe o valor');C.op.push({k:a=='sup'?'s':'r',v:x,t:Date.now()});sv('c',C);rAll();toast(a=='sup'?'Suprimento registrado':'Sangria registrada')}
+else if(a=='fechar'){if(cart.length)return toast('Finalize ou limpe a venda atual');const f=$('#c_c').value;if(!f.trim())return toast('Informe o dinheiro contado');const m=sum(C),cont=pm(f),dif=Math.round((cont-m.esp)*100)/100;H.push({a:C.t,f:Date.now(),fundo:C.fundo,n:m.n,total:m.total,pays:m.pays,sup:m.sup,san:m.san,esp:m.esp,cont,dif});sv('h',H);C=null;sv('c',null);rAll();toast(dif==0?'Caixa fechado sem diferença':'Caixa fechado · '+(dif>0?'sobra ':'falta ')+R(Math.abs(dif)))}});
+$('#q').addEventListener('input',e=>{q=e.target.value.toLowerCase().trim();rG()});
+$('#q').addEventListener('keydown',e=>{if(e.key!='Enter')return;const l=flt(),x=P.find(p=>p.c.toLowerCase()==q)||(l.length==1?l[0]:null);if(x&&tot(x)>0){pick(x.c);e.target.value='';q='';rG()}else toast('Produto não encontrado')});
+$('#at').addEventListener('change',rC);$('#dc').addEventListener('input',rC);
+rAll();
+</script>
+</body>
+</html>
