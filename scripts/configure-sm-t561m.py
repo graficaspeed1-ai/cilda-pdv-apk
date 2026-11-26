@@ -91,82 +91,79 @@ if len(java_files) != 1:
     raise SystemExit("Esperado um MainActivity.java; encontrados: " + str([str(p) for p in java_files]))
 java = java_files[0]
 src = java.read_text(encoding="utf-8")
-marker = "    private WebResourceResponse getBundledResource(String requestUrl) {"
-if marker not in src:
-    raise SystemExit("MainActivity encontrado em " + str(java) + " mas sem método esperado. Conteúdo:\\n" + src)
-start = src.index(marker)
-end = src.index("    private boolean isHomeDocumentUrl(String url) {", start)
-method = '''    private boolean isTrustedHost(String host) {
-        return HOME_HOST.equals(host) || "appassets.androidplatform.net".equals(host);
-    }
 
-    private WebResourceResponse getBundledResource(String requestUrl) {
-        try {
-            Uri uri = Uri.parse(requestUrl);
-            String host = uri.getHost();
-            String path = uri.getPath();
-            String asset = null;
-            String mime = "application/octet-stream";
+# Android 4.4 não possui WebViewAssetLoader nem WebResourceRequest.
+# Servir diretamente os assets por shouldInterceptRequest(WebView, String).
+src = src.replace("import android.webkit.PermissionRequest;\\n", "")
+src = src.replace("import androidx.webkit.WebViewAssetLoader;\\n", "")
+src = src.replace("import androidx.core.app.ActivityCompat;\\n", "")
+src = src.replace("    private PermissionRequest pendingRequest;\\n", "")
+src = src.replace("    private static final int CAMERA_PERMISSION = 41;\\n", "")
 
-            if ("appassets.androidplatform.net".equals(host)) {
-                if (path == null || !path.startsWith("/assets/")) return null;
-                asset = path.substring("/assets/".length());
-                if (asset.length() == 0 || asset.contains("..")) return null;
-                if (asset.endsWith(".html")) mime = "text/html";
-                else if (asset.endsWith(".js")) mime = "application/javascript";
-                else if (asset.endsWith(".css")) mime = "text/css";
-                else if (asset.endsWith(".json")) mime = "application/json";
-                else if (asset.endsWith(".svg")) mime = "image/svg+xml";
-                else if (asset.endsWith(".png")) mime = "image/png";
-                else if (asset.endsWith(".jpg") || asset.endsWith(".jpeg")) mime = "image/jpeg";
-                else if (asset.endsWith(".gif")) mime = "image/gif";
-                else if (asset.endsWith(".woff")) mime = "application/font-woff";
-                else if (asset.endsWith(".woff2")) mime = "font/woff2";
-                else if (asset.endsWith(".ttf")) mime = "font/ttf";
-                else if (asset.endsWith(".webp")) mime = "image/webp";
-            } else if (HOME_HOST.equals(host)) {
-                if (path == null || path.length() == 0 || "/".equals(path) || "/index.html".equals(path)) {
-                    asset = "cilda/index.html";
-                    mime = "text/html";
-                } else if ("/app.js".equals(path)) asset = "cilda/app.js";
-                else if ("/sync.js".equals(path)) asset = "cilda/sync.js";
-                else if ("/config.js".equals(path)) asset = "cilda/config.js";
-                else if ("/boot.js".equals(path)) asset = "cilda/boot.js";
-                else if ("/compat.js".equals(path)) asset = "cilda/compat.js";
-                if (asset != null && mime.equals("application/octet-stream")) mime = "application/javascript";
-            } else {
-                return null;
-            }
-
-            if (asset == null) return null;
-            return new WebResourceResponse(mime, "UTF-8", getAssets().open(asset));
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-'''
-src = src[:start] + method + src[end:]
-src = re.sub(
-    r'private boolean isHomeDocumentUrl\(String url\) \{.*?\n    \}',
-    '''private boolean isHomeDocumentUrl(String url) {
-        try {
-            Uri uri = Uri.parse(url);
-            String host = uri.getHost();
-            String path = uri.getPath();
-            if (HOME_HOST.equals(host)) {
-                return path == null || path.length() == 0 || "/".equals(path) || "/index.html".equals(path);
-            }
-            return "appassets.androidplatform.net".equals(host)
-                    && path != null && path.endsWith("/assets/www/index.html");
-        } catch (Exception ignored) {
-            return false;
-        }
-    }''',
+src, count = re.subn(
+    r'        WebViewAssetLoader loader = new WebViewAssetLoader\\.Builder\\(\\).*?\\.build\\(\\);\\n',
+    '',
     src, count=1, flags=re.S
 )
-src = src.replace('if (HOME_HOST.equals(Uri.parse(url).getHost())) {', 'if (isTrustedHost(Uri.parse(url).getHost())) {')
-src = src.replace('if (HOME_HOST.equals(host)) {\n                    handler.proceed();', 'if (isTrustedHost(host)) {\n                    handler.proceed();')
-src = src.replace('if (!HOME_HOST.equals(currentHost)) return;', 'if (!isTrustedHost(currentHost)) return;')
+if count != 1:
+    raise SystemExit("Não foi possível remover WebViewAssetLoader do MainActivity.")
+
+client = '''        webView.setWebViewClient(new WebViewClient() {
+            @Override public android.webkit.WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                try {
+                    android.net.Uri uri = android.net.Uri.parse(url);
+                    if (!"appassets.androidplatform.net".equals(uri.getHost())) return null;
+                    String path = uri.getPath();
+                    if (path == null || !path.startsWith("/assets/")) return null;
+                    String asset = path.substring("/assets/".length());
+                    if (asset.length() == 0 || asset.contains("..")) return null;
+                    String mime = "application/octet-stream";
+                    if (asset.endsWith(".html")) mime = "text/html";
+                    else if (asset.endsWith(".js")) mime = "application/javascript";
+                    else if (asset.endsWith(".css")) mime = "text/css";
+                    else if (asset.endsWith(".json") || asset.endsWith(".webmanifest")) mime = "application/json";
+                    else if (asset.endsWith(".png")) mime = "image/png";
+                    else if (asset.endsWith(".jpg") || asset.endsWith(".jpeg")) mime = "image/jpeg";
+                    else if (asset.endsWith(".svg")) mime = "image/svg+xml";
+                    else if (asset.endsWith(".woff")) mime = "application/font-woff";
+                    else if (asset.endsWith(".woff2")) mime = "font/woff2";
+                    return new android.webkit.WebResourceResponse(mime, "UTF-8", getAssets().open(asset));
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+
+            @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                android.net.Uri uri = android.net.Uri.parse(url);
+                return !"appassets.androidplatform.net".equals(uri.getHost());
+            }
+        });
+'''
+src, count = re.subn(
+    r'        webView\\.setWebViewClient\\(new WebViewClient\\(\\) \\{.*?\\n        \\}\\);',
+    client.rstrip(),
+    src, count=1, flags=re.S
+)
+if count != 1:
+    raise SystemExit("Não foi possível substituir WebViewClient por interceptação compatível com API 19.")
+
+src, count = re.subn(
+    r'        webView\\.setWebChromeClient\\(new WebChromeClient\\(\\) \\{.*?\\n        \\}\\);',
+    '        webView.setWebChromeClient(new WebChromeClient());',
+    src, count=1, flags=re.S
+)
+if count != 1:
+    raise SystemExit("Não foi possível remover callback de câmera exclusivo do Android 5+.")
+
+src, count = re.subn(
+    r'    @Override public void onRequestPermissionsResult\\(int requestCode, String\\[\\] permissions, int\\[\\] grantResults\\) \\{.*?\\n    \\}\\n',
+    '',
+    src, count=1, flags=re.S
+)
+if count != 1:
+    raise SystemExit("Não foi possível remover tratamento de permissão exclusivo do Android 6+.")
+
+if "WebViewAssetLoader" in src or "WebResourceRequest" in src or "PermissionRequest" in src:
+    raise SystemExit("Ainda há API Android 5+ incompatível no MainActivity.")
 java.write_text(src, encoding="utf-8")
 print("SM-T561M: WebView local appassets interceptado para Android 4.4, assets/www servidos localmente.")
