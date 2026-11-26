@@ -95,9 +95,7 @@ src = java.read_text(encoding="utf-8")
 # Substituição completa da Activity por WebView nativo compatível com API 19.
 # O endereço appassets é interceptado e mapeado diretamente para assets/www.
 header = src[:src.index("public class MainActivity")]
-header = header.replace("import android.webkit.PermissionRequest;\\n", "")
-header = header.replace("import androidx.webkit.WebViewAssetLoader;\\n", "")
-header = header.replace("import androidx.core.app.ActivityCompat;\\n", "")
+header = re.sub(r"^import .*?(?:PermissionRequest|WebViewAssetLoader|ActivityCompat).*\\n", "", header, flags=re.M)
 activity = r"""public class MainActivity extends Activity {
     private WebView webView;
 
