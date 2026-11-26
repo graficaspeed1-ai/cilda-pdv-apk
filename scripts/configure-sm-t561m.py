@@ -41,6 +41,17 @@ if not all(seen.values()):
             break
     else:
         raise SystemExit("Bloco defaultConfig não encontrado no Gradle.")
+# WebKit 1.12.1 exige Android 5.0 (API 21). Fixar versão antiga compatível com KitKat/API 19.
+webkit_found = False
+for candidate in root.rglob("*"):
+    if candidate.is_file() and candidate.suffix in (".gradle", ".kts", ".toml"):
+        data = candidate.read_text(encoding="utf-8")
+        updated = data.replace("androidx.webkit:webkit:1.12.1", "androidx.webkit:webkit:1.6.1")
+        if updated != data:
+            candidate.write_text(updated, encoding="utf-8")
+            webkit_found = True
+if not webkit_found:
+    raise SystemExit("Dependência androidx.webkit:webkit:1.12.1 não encontrada para ajuste do Android 4.4.")
 gradle.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 m = manifest.read_text(encoding="utf-8")
