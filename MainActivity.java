@@ -16,6 +16,7 @@ public class MainActivity extends Activity {
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
         s.setBuiltInZoomControls(false);
+        s.setAllowUniversalAccessFromFileURLs(true);
         web.loadUrl("file:///android_asset/index.html");
         setContentView(web);
     }

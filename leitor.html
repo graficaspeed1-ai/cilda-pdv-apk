@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Leitor Cilda Biju</title>
+<style>
+body{margin:0;font:16px system-ui,sans-serif;background:#F2F0F5;color:#2A1B3D}
+main{max-width:520px;margin:0 auto;padding:16px}
+h1{font:600 22px Georgia,serif;margin:0 0 4px}
+.mut{color:#6F6579;font-size:14px}
+video{width:100%;border-radius:14px;background:#000;margin:12px 0;aspect-ratio:4/3;object-fit:cover}
+#ult{font-size:22px;font-weight:700;min-height:30px}
+input,button{font:inherit;height:48px;border-radius:12px;border:1px solid #E4DFEA;padding:0 14px}
+input{width:100%;box-sizing:border-box;margin-bottom:8px}
+button{background:#B03A6E;color:#fff;border:0;width:100%;font-weight:700}
+.ok{color:#1E7A4C}.err{color:#A12D5F}
+</style>
+</head>
+<body>
+<main>
+<h1>Leitor de código de barras</h1>
+<div class="mut" id="est">Iniciando…</div>
+<video id="v" playsinline muted></video>
+<div class="mut">Última leitura enviada</div>
+<div id="ult">—</div>
+<p class="mut">Se a câmera não funcionar, digite o código:</p>
+<input id="man" placeholder="Código do produto" autocapitalize="characters">
+<button id="env">Enviar código</button>
+</main>
+<script>
+var topic=(location.hash||'').replace('#','').replace(/[^a-z0-9]/gi,'');
+var est=document.getElementById('est'),ult=document.getElementById('ult'),vid=document.getElementById('v');
+var lastCode='',lastTime=0;
+function msg(t,c){est.textContent=t;est.className='mut '+(c||'')}
+if(!topic){msg('Link incompleto: abra o link mostrado na aba Conta do tablet.','err')}
+function enviar(code){
+  code=String(code).trim();if(!code||!topic)return;
+  var agora=Date.now();if(code===lastCode&&agora-lastTime<2500)return;
+  lastCode=code;lastTime=agora;
+  fetch('https://ntfy.sh/'+topic,{method:'POST',body:code}).then(function(r){
+    if(!r.ok)throw 0;ult.textContent=code;msg('Enviado ao tablet','ok');if(navigator.vibrate)navigator.vibrate(80);
+  }).catch(function(){msg('Falha ao enviar. Verifique a internet do celular.','err')});
+}
+document.getElementById('env').onclick=function(){var i=document.getElementById('man');enviar(i.value);i.value=''};
+function usarZXing(stream){
+  var s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js';
+  s.onload=function(){
+    var r=new ZXing.BrowserMultiFormatReader();
+    r.decodeFromVideoElement(vid,function(res){if(res)enviar(res.getText())});
+    msg('Aponte para o código de barras');
+  };
+  s.onerror=function(){msg('Leitura automática indisponível. Use o campo abaixo.','err')};
+  document.head.appendChild(s);
+}
+if(topic){
+  navigator.mediaDevices&&navigator.mediaDevices.getUserMedia?
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(stream){
+    vid.srcObject=stream;vid.play();
+    if('BarcodeDetector' in window){
+      var det=new BarcodeDetector({formats:['ean_13','ean_8','code_128','code_39','upc_a','upc_e','itf','qr_code']});
+      msg('Aponte para o código de barras');
+      setInterval(function(){det.detect(vid).then(function(a){if(a.length)enviar(a[0].rawValue)}).catch(function(){})},350);
+    }else usarZXing(stream);
+  }).catch(function(){msg('Permita o acesso à câmera ou digite o código abaixo.','err')})
+  :msg('Este navegador não abre a câmera. Use o campo abaixo.','err');
+}
+</script>
+</body>
+</html>
