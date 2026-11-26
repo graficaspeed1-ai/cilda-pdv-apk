@@ -7,6 +7,7 @@ on:
     paths:
       - 'cilda-vendas-projeto-android.zip'
       - '.github/workflows/build-cilda-vendas-apk.yml'
+      - 'scripts/configure-sm-t561m.py'
 
 permissions:
   contents: read
@@ -35,6 +36,9 @@ jobs:
           fi
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
           echo "Projeto Android encontrado em: $PROJECT_DIR"
+
+      - name: Apply Samsung SM-T561M settings
+        run: python3 scripts/configure-sm-t561m.py "$PROJECT_DIR"
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
