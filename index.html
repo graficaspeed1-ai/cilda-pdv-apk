@@ -14,34 +14,43 @@ button{cursor:pointer;min-height:44px;border-radius:22px;border:1px solid var(--
 button:disabled{opacity:.5;cursor:default}
 button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 input{height:44px;border:1px solid var(--ln);border-radius:12px;padding:0 14px;background:#fff;-webkit-user-select:text;user-select:text}
-header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 24px}
-.logo{width:52px;height:52px;border-radius:12px;background:#1E1428;color:#D9A98F;display:grid;place-items:center;font:15px Georgia,serif;letter-spacing:1px}
-nav{display:flex;gap:8px;flex-wrap:wrap}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px}
+.logo{width:52px;height:52px;border-radius:12px;background:#1E1428;color:#D9A98F;display:flex;align-items:center;justify-content:center;font:15px Georgia,serif;letter-spacing:1px}
 #st,.mut,small{color:var(--mut)}
 #st{font-size:13px;text-align:right}#st b{color:var(--ink)}
-main{flex:1;display:flex;gap:24px;padding:8px 24px 24px;min-height:0}
-section.l{flex:1;display:flex;flex-direction:column;gap:14px;min-width:0}
+main{flex:1;display:flex;padding:8px 24px 24px;min-height:0}
+section.l{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
 #q{height:52px;border-radius:26px;padding:0 20px}
-#ch{display:flex;gap:10px;flex-wrap:wrap}
+#ch{display:flex;flex-wrap:wrap}
 #gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;align-content:start;overflow:auto;flex:1}
-.pc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:112px;border-radius:14px;padding:14px;text-align:left}
+.pc{display:flex;flex-direction:column;align-items:flex-start;min-height:112px;border-radius:14px;padding:14px;text-align:left}
 .pc small{font-weight:400;font-size:11px;min-height:14px}.pc .pk{color:var(--pk);font-size:12px}
 .pr{font:24px Georgia,serif;margin-top:auto}
-aside{width:340px;background:#fff;border:1px solid var(--ln);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;overflow:auto}
+aside{width:340px;background:#fff;border:1px solid var(--ln);border-radius:16px;padding:18px;display:flex;flex-direction:column;overflow:auto}
 h2{margin:0;font:22px Georgia,serif}
-.r{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.r{display:flex;justify-content:space-between;align-items:center}
 #ci{flex:1;min-height:80px;overflow:auto}.ct{text-align:center;line-height:1.5}
-.li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #EFE7DF}.f1{flex:1}.f1 small{display:block}
+.li{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #EFE7DF}.f1{flex:1}.f1 small{display:block}
 .sq{width:44px;padding:0;border-radius:12px;font-size:20px}
 #dc{width:84px;text-align:right}
 .tot{font:34px Georgia,serif;color:#8A5A1A}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.g2 button{border-radius:12px;height:52px}
 .fin{height:60px;border:0;border-radius:14px;background:var(--pk);color:#fff}.fin:disabled{background:#E9B3CB;opacity:1}
-#g{gap:24px;overflow:auto}.card{flex:1;background:#fff;border:1px solid var(--ln);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.ov{position:fixed;inset:0;background:rgba(42,27,61,.55);display:grid;place-items:center}
-.dl{width:360px;background:#fff;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.ov{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(42,27,61,.55);display:flex;align-items:center;justify-content:center}
+.dl{width:360px;background:#fff;border-radius:18px;padding:24px;display:flex;flex-direction:column}
 .op{display:flex;justify-content:space-between;align-items:center;height:56px;border:0;border-radius:12px;background:#F1EDF4}
 #t{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:14px 22px;border-radius:14px}
+header>*+*{margin-left:16px}
+main>*+*{margin-left:24px}
+section.l>*+*{margin-top:14px}
+#ch>*{margin:0 10px 10px 0}#ch{margin-bottom:-10px}
+aside>*+*{margin-top:12px}
+.dl>*+*{margin-top:12px}
+.r>*+*,.li>*+*{margin-left:10px}
+#at{margin-right:10px}
+.pc>*+*{margin-top:2px}.pc>.pr{margin-top:auto}
+@media (max-width:1000px){aside{width:300px}.pc{min-height:96px}}
+@media (max-height:700px){header{padding:8px 24px}.logo{width:44px;height:44px}main{padding:4px 24px 16px}aside{padding:12px}aside>*+*{margin-top:8px}.tot{font-size:26px}.fin{height:52px}.g2 button{height:44px}h2{font-size:19px}}
 </style>
 </head>
 <body>
