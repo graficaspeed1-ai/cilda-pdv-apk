@@ -62,6 +62,18 @@ for candidate in root.rglob("*"):
             candidate.write_text(updated, encoding="utf-8")
 if not webkit_found:
     raise SystemExit("Não foi possível localizar a versão 1.12.1 da dependência AndroidX WebKit.")
+# Força a versão também se outra biblioteca solicitar WebKit mais recente.
+lines.extend([
+    "",
+    "// Compatibilidade SM-T561M: impedir resolução transitiva do WebKit API 21+.",
+    "configurations.all {",
+    "    resolutionStrategy.eachDependency { details ->",
+    "        if (details.requested.group == 'androidx.webkit' && details.requested.name == 'webkit') {",
+    "            details.useVersion '1.6.1'",
+    "        }",
+    "    }",
+    "}",
+])
 gradle.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 m = manifest.read_text(encoding="utf-8")
