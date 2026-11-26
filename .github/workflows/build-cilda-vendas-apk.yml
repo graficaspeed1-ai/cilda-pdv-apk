@@ -1,4 +1,4 @@
-name: Build CILDA Vendas APK - KitKat local assets v2
+name: Build CILDA Vendas APK - KitKat local assets v3
 
 on:
   workflow_dispatch:
