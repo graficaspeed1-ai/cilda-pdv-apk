@@ -86,11 +86,15 @@ if 'android:screenOrientation=' not in m:
 manifest.write_text(m, encoding="utf-8")
 
 # Corrige o WebView legado: Capacitor usa appassets.androidplatform.net/assets/www/.
-java = root / "app" / "src" / "main" / "java" / "com" / "cilda" / "pdv" / "MainActivity.java"
-if not java.is_file():
-    raise SystemExit("MainActivity.java não encontrado no projeto Android.")
+java_files = list((root / "app" / "src" / "main" / "java").rglob("MainActivity.java"))
+if len(java_files) != 1:
+    raise SystemExit("Esperado um MainActivity.java; encontrados: " + str([str(p) for p in java_files]))
+java = java_files[0]
 src = java.read_text(encoding="utf-8")
-start = src.index("    private WebResourceResponse getBundledResource(String requestUrl) {")
+marker = "    private WebResourceResponse getBundledResource(String requestUrl) {"
+if marker not in src:
+    raise SystemExit("MainActivity encontrado em " + str(java) + " mas sem método esperado. Conteúdo:\\n" + src)
+start = src.index(marker)
 end = src.index("    private boolean isHomeDocumentUrl(String url) {", start)
 method = '''    private boolean isTrustedHost(String host) {
         return HOME_HOST.equals(host) || "appassets.androidplatform.net".equals(host);
