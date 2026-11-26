@@ -92,23 +92,28 @@ if len(java_files) != 1:
 java = java_files[0]
 src = java.read_text(encoding="utf-8")
 
-# Android 4.4 não possui WebViewAssetLoader nem WebResourceRequest.
-# Servir diretamente os assets por shouldInterceptRequest(WebView, String).
-src = src.replace("import android.webkit.PermissionRequest;\\n", "")
-src = src.replace("import androidx.webkit.WebViewAssetLoader;\\n", "")
-src = src.replace("import androidx.core.app.ActivityCompat;\\n", "")
-src = src.replace("    private PermissionRequest pendingRequest;\\n", "")
-src = src.replace("    private static final int CAMERA_PERMISSION = 41;\\n", "")
+# Substituição completa da Activity por WebView nativo compatível com API 19.
+# O endereço appassets é interceptado e mapeado diretamente para assets/www.
+header = src[:src.index("public class MainActivity")]
+header = header.replace("import android.webkit.PermissionRequest;\\n", "")
+header = header.replace("import androidx.webkit.WebViewAssetLoader;\\n", "")
+header = header.replace("import androidx.core.app.ActivityCompat;\\n", "")
+activity = r"""public class MainActivity extends Activity {
+    private WebView webView;
 
-src, count = re.subn(
-    r'        WebViewAssetLoader loader = new WebViewAssetLoader\\.Builder\\(\\).*?\\.build\\(\\);\\n',
-    '',
-    src, count=1, flags=re.S
-)
-if count != 1:
-    raise SystemExit("Não foi possível remover WebViewAssetLoader do MainActivity.")
+    @Override public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        webView = new WebView(this);
+        setContentView(webView);
 
-client = '''        webView.setWebViewClient(new WebViewClient() {
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(true);
+
+        webView.setWebViewClient(new WebViewClient() {
             @Override public android.webkit.WebResourceResponse shouldInterceptRequest(WebView view, String url) {
                 try {
                     android.net.Uri uri = android.net.Uri.parse(url);
@@ -138,32 +143,18 @@ client = '''        webView.setWebViewClient(new WebViewClient() {
                 return !"appassets.androidplatform.net".equals(uri.getHost());
             }
         });
-'''
-src, count = re.subn(
-    r'        webView\\.setWebViewClient\\(new WebViewClient\\(\\) \\{.*?\\n        \\}\\);',
-    client.rstrip(),
-    src, count=1, flags=re.S
-)
-if count != 1:
-    raise SystemExit("Não foi possível substituir WebViewClient por interceptação compatível com API 19.")
+        webView.setWebChromeClient(new WebChromeClient());
+        webView.loadUrl("https://appassets.androidplatform.net/assets/www/index.html");
+    }
 
-src, count = re.subn(
-    r'        webView\\.setWebChromeClient\\(new WebChromeClient\\(\\) \\{.*?\\n        \\}\\);',
-    '        webView.setWebChromeClient(new WebChromeClient());',
-    src, count=1, flags=re.S
-)
-if count != 1:
-    raise SystemExit("Não foi possível remover callback de câmera exclusivo do Android 5+.")
-
-src, count = re.subn(
-    r'    @Override public void onRequestPermissionsResult\\(int requestCode, String\\[\\] permissions, int\\[\\] grantResults\\) \\{.*?\\n    \\}\\n',
-    '',
-    src, count=1, flags=re.S
-)
-if count != 1:
-    raise SystemExit("Não foi possível remover tratamento de permissão exclusivo do Android 6+.")
-
+    @Override public void onBackPressed() {
+        if (webView != null && webView.canGoBack()) webView.goBack();
+        else super.onBackPressed();
+    }
+}
+"""
+src = header + activity
 if "WebViewAssetLoader" in src or "WebResourceRequest" in src or "PermissionRequest" in src:
-    raise SystemExit("Ainda há API Android 5+ incompatível no MainActivity.")
+    raise SystemExit("APIs posteriores ao Android 4.4 ainda aparecem na Activity.")
 java.write_text(src, encoding="utf-8")
 print("SM-T561M: WebView local appassets interceptado para Android 4.4, assets/www servidos localmente.")
